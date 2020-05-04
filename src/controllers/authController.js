@@ -23,6 +23,7 @@ exports.login = async (req, res) => {
 
 exports.auth = async (req, res, next) => {
     try{
+        console.log("auth")
         if(!req.headers.authorization || !req.headers.authorization.startsWith("Bearer")){
             throw new Error("Unauthorized access")
         }

@@ -6,16 +6,19 @@ const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const router = express.Router()
 
-const {createUser, readUsers, updateUser} = require('./src/controllers/userController')
-const {login, auth, logout} = require('./src/controllers/authController')
-const {createTour, readAllTours, readSingleTour, readMyTours, readToursOfCategory,
-    deleteTour, updateTour} = require('./src/controllers/tourController')
-const {checkTour, checkTourExist} = require('./src/middlewares/checkTour')
-const {createReview, readReviews, 
-    checkReview, deleteReview, updateReview} = require('./src/controllers/reviewController')
-const {createCategory, getCategories, 
-    deleteCategory, updateCategory} = require('./src/controllers/categoryController')
 
+const { auth } = require('./src/controllers/authController')
+
+// const {createCategory, getCategories, 
+//     deleteCategory, updateCategory} = require('./src/controllers/categoryController')
+
+const userRouter = require('./src/routers/userRouter')
+const authRouter = require('./src/routers/authRouter')
+const tourRouter = require('./src/routers/tourRouter')
+const reviewRouter = require('./src/routers/reviewRouter')
+
+const { errorController } = require('./src/middlewares/errorController') 
+const AppError = require('./src/middlewares/appError')
 
 mongoose.connect(process.env.LOCAL_DB, {
     useCreateIndex: true,
@@ -28,49 +31,38 @@ app.use(bodyParser.urlencoded({extended: false})) //to what?
 app.use(bodyParser.json()) //to make request json?
 app.use(router)
 
-router.route("/user")
-.post(createUser)
-.get(readUsers)
-.patch(auth, updateUser)
+// router.route("/").get((req, res) => {res.send("ok")})
 
-router.route("/login")
-.post(login)
+router.use("/users", userRouter)
 
-router.route("/logout")
-.post(auth, logout)
+router.use("/tours/:tourID/reviews", reviewRouter)
 
-router.route("/myTours")
-.get(auth, readMyTours)
+router.use("/tours", tourRouter)
 
-router.route("/tours/:tourID/reviews/:reviewID")
-.delete(auth, checkTourExist, checkReview, deleteReview)
-.patch(auth, checkTourExist, checkReview, updateReview)
+router.use("/auth", authRouter)
 
-router.route("/tours/:tourID/reviews")
-.post(auth, checkTourExist, createReview)
-.get(checkTourExist, readReviews)
+//404 handler
+function notFound(req, res, next){
+    next(new AppError(404, "URL Not Found"))
+}
 
-router.route("/tours/:tourID")
-.delete(auth, checkTour, deleteTour)
-.patch(auth, checkTour, updateTour)
-.get(auth, checkTour, readSingleTour)
+router.route("*").all(notFound)
 
-router.route("/tours")
-.get(readAllTours)
+app.use(errorController)
 
-router.route("/newTour")
-.post(auth, createTour)
 
-router.route("/categories/:categoryID/tours")
-.get(readToursOfCategory)
 
-router.route("/categories/:categoryID")
-.delete(auth, deleteCategory)
-.patch(auth, updateCategory)
+// router.route("/categories/:categoryID/tours")
+// .get(readToursOfCategory)
 
-router.route("/categories")
-.post(auth, createCategory)
-.get(getCategories)
+
+// router.route("/categories/:categoryID")
+// .delete(auth, deleteCategory)
+// .patch(auth, updateCategory)
+
+// router.route("/categories")
+// .post(auth, createCategory)
+// .get(getCategories)
 
 app.listen(process.env.PORT, () => console.log("Listening to port",process.env.PORT))
 

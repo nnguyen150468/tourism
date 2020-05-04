@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const User = require('./user')
 const Category = require('./category')
+const Review = require('./review')
 
 const tourSchema = new mongoose.Schema({
     title: {
@@ -31,7 +32,7 @@ const tourSchema = new mongoose.Schema({
             ref: "User",
             required: true
         }
-    ]
+    ],
 }, {
     timestamps: true,
     toJSON: {virtuals: true},
@@ -60,6 +61,10 @@ tourSchema.pre("save", async function(next){
     next()
 })
 
+tourSchema.post("findOneAndDelete", async function(next){
+    await Review.deleteMany({tour: this._conditions._id})
+})
+
 tourSchema.virtual("reviews", {
     ref: "Review",
     localField: "_id",
@@ -70,6 +75,7 @@ tourSchema.pre(/^find/, async function(next){
     this
         .populate("organizer guides", "_id name email")
         .populate("categories")
+        // .populate("reviews", "content id rating")
     next()
 })
 
@@ -94,6 +100,8 @@ tourSchema.methods.toJSON = function(){
     tourObject.guides.map(el=>delete el.tokens)
     tourObject.categories.map(el=>delete el.__v)
     tourObject.guides.map(guide=> {delete guide.password; delete guide.__v})
+    if(!tourObject.reviews) return tourObject 
+    tourObject.reviews.map(review=> delete review.tour)
     return tourObject
 }
 

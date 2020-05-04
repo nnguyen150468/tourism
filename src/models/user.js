@@ -29,9 +29,15 @@ const userSchema = new mongoose.Schema({
     tokens: Array
 })
 
-userSchema.pre("save", async function(next){
+userSchema.pre("save", async function(next){ //this = doc
     if(!this.isModified("password")) return next();
     this.password = await bcrypt.hash(this.password, saltRounds)
+    next()
+})
+
+userSchema.pre("findOneAndUpdate", async function(next){ //this = query
+    if(!this._update.password) return next();
+    this._update.password = await bcrypt.hash(this._update.password, saltRounds)
     next()
 })
 

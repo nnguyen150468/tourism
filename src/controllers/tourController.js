@@ -1,4 +1,6 @@
 const Tour = require('../models/tour')
+const Review = require('../models/review')
+const { deleteOne, updateOne, readAll } = require('./factories')
 
 exports.createTour = async (req, res) => {
     try{
@@ -23,61 +25,67 @@ exports.createTour = async (req, res) => {
     }
 }
 
-exports.readAllTours = async (req, res) => {
-    try{
-        const allTours = await Tour.find()
-        return res.status(200).json({
-            status: "success",
-            data: allTours
-        })
-    } catch(err){
-        return res.status(501).json({
-            status: "failed",
-            message: err.message
-        })
-    }
-}
+exports.readAllTours = readAll(Tour)
 
-exports.deleteTour = async (req, res) => {
-    try{
-        await Tour.findByIdAndDelete(req.tour._id)
-        return res.status(201).json({
-            status: "success",
-            data: null
-        })
-    } catch(err){
-        return res.status(401).json({
-            status: "failed",
-            message: err.message
-        })
-    }
-}
+// exports.readAllTours = async (req, res) => {
+//     try{
+//         const allTours = await Tour.find()
+//         return res.status(200).json({
+//             status: "success",
+//             data: allTours
+//         })
+//     } catch(err){
+//         return res.status(501).json({
+//             status: "failed",
+//             message: err.message
+//         })
+//     }
+// }
 
-exports.updateTour = async (req, res) => {
-    try{
-        console.log('req.tour',req.tour.categories)
-        const updatedTour = await Tour.findByIdAndUpdate(req.params.tourID, 
-            {
-            //if user fill in nothing, it will keep the original data
-            title: !req.body.title ? req.tour.title : req.body.title,
-            description: !req.body.description ? req.tour.description : req.body.description,
-            categories: !req.body.categories ? req.tour.categories.map(el => el._id) : req.body.categories,
-            guides: !req.body.guides ? req.tour.guides.map(el => el._id) : req.body.guides
-            // ...req.body
-        },
-        {new: true})
-        console.log('updatedTour', updatedTour)
-        return res.status(201).json({
-            status: "success",
-            data: updatedTour
-        })
-    } catch(err){
-        return res.status(401).json({
-            status: "failed",
-            message: err.message
-        })
-    }
-}
+// exports.deleteTour = async (req, res) => {
+//     try{
+//         await Tour.findByIdAndDelete(req.tour._id)
+//         return res.status(201).json({
+//             status: "success",
+//             data: null
+//         })
+//     } catch(err){
+//         return res.status(401).json({
+//             status: "failed",
+//             message: err.message
+//         })
+//     }
+// }
+
+exports.deleteTour = deleteOne(Tour)
+
+// exports.updateTour = async (req, res) => {
+//     try{
+//         console.log('req.tour',req.tour.categories)
+//         const updatedTour = await Tour.findByIdAndUpdate(req.params.tourID, 
+//             {
+//             //if user fill in nothing, it will keep the original data
+//             title: !req.body.title ? req.tour.title : req.body.title,
+//             description: !req.body.description ? req.tour.description : req.body.description,
+//             categories: !req.body.categories ? req.tour.categories.map(el => el._id) : req.body.categories,
+//             guides: !req.body.guides ? req.tour.guides.map(el => el._id) : req.body.guides
+//             // ...req.body
+//         },
+//         {new: true})
+//         console.log('updatedTour', updatedTour)
+//         return res.status(201).json({
+//             status: "success",
+//             data: updatedTour
+//         })
+//     } catch(err){
+//         return res.status(401).json({
+//             status: "failed",
+//             message: err.message
+//         })
+//     }
+// }
+
+exports.updateTour = updateOne(Tour)
 
 exports.readSingleTour = async (req, res) => {
     try{
