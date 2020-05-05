@@ -9,8 +9,10 @@ const router = express.Router()
 
 const { auth } = require('./src/controllers/authController')
 
-// const {createCategory, getCategories, 
-//     deleteCategory, updateCategory} = require('./src/controllers/categoryController')
+const catchAsync = require('./src/middlewares/catchAsync')
+
+const {createCategory, getCategories, 
+    deleteCategory, updateCategory} = require('./src/controllers/categoryController')
 
 const userRouter = require('./src/routers/userRouter')
 const authRouter = require('./src/routers/authRouter')
@@ -61,8 +63,26 @@ app.use(errorController)
 // .patch(auth, updateCategory)
 
 // router.route("/categories")
-// .post(auth, createCategory)
+// // .post(auth, createCategory)
 // .get(getCategories)
+
+router.get("/categories", catchAsync(async (req, res, next) => {
+    const arr = [
+      { category: "japan" },
+      { category: "russia" },
+      { category: "vietnam" },
+      { category: "korea" },
+      { category: "china" },
+      { category: "usa" },
+      { category: "thailand" },
+      { category: "australia" },
+      { category: "asia" },
+      { category: "europe" },
+      { category: "SEA" }
+    ];
+    const cates = await Category.insertMany(arr);
+    res.json(cates);
+  }));
 
 app.listen(process.env.PORT, () => console.log("Listening to port",process.env.PORT))
 

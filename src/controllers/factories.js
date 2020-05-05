@@ -13,15 +13,16 @@ exports.deleteOne = Model => catchAsync(async (req, res) => {
         default:
             id = req.params.id
     }
-    await Model.findOneAndDelete({_id: id})
-    
+    // await Model.findOneAndDelete({_id: id})
+    await Model.findOneAndDelete(id);
+
     if(!id) return next(new AppError(400, "There is no such item"))
 
     res.status(204).end()
 })
 
 // function(Model => {return (req,res)})
-exports.updateOne = Model => catchAsync(async (req, res) => {
+exports.updateOne = Model => catchAsync(async (req, res, next) => {
     let id;
     let allows = []
     switch(Model.modelName){
@@ -40,16 +41,22 @@ exports.updateOne = Model => catchAsync(async (req, res) => {
         default:
             id = req.params.id
     }
-    Object.keys(req.body).forEach(el => {
-        if(!allows.includes(el))
-        delete req.body[el]
-    })
-    
-    const newItem = await Model.findOneAndUpdate({_id: id},
-        req.body, //use the same keys, {...req.body} creates new object
-        { new: true})
 
-    res.status(201).json({status: "OK", data: newItem})
+    const item = await Model.findOne({_id: id})
+    console.log('item',item)
+    if(!item) return next(new AppError(404, "No item found"))
+
+    Object.keys(req.body).map(el => {
+        if(allows.includes(el)){
+            item[el] = req.body[el]
+        }
+    })
+    console.log('Model', Model)
+    await item.save()
+
+    res.json({status: "success", data: item})
+
+    // res.status(201).json({status: "OK", data: item})
 })
 
 exports.readOne = Model => catchAsync(async (req, res, next) => {

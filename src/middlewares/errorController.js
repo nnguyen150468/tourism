@@ -44,11 +44,14 @@ const handleValidationErrorDB = err => {
 exports.errorController = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || "error";
-
+    
     if(process.env.NODE_ENV === "development"){
+        
         errorDev(err, res)
+        
     } else if(process.env.NODE_ENV === "production"){
         let error = {...err}
+
 
         //invalid field format (mongoDB)c
         if(error.name==="CastError")
@@ -60,7 +63,7 @@ exports.errorController = (err, req, res, next) => {
         if(error.name==="ValidationError")
             error = handleValidationErrorDB(error);
 
-        console.log('error',error)
+        
         errorProduction(err, res)
     }
 }

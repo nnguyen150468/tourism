@@ -1,6 +1,8 @@
 const Tour = require('../models/tour')
 const Review = require('../models/review')
+const AppError = require('../middlewares/appError')
 const { deleteOne, updateOne, readAll } = require('./factories')
+const catchAsync = require('../middlewares/catchAsync')
 
 exports.createTour = async (req, res) => {
     try{
@@ -27,20 +29,47 @@ exports.createTour = async (req, res) => {
 
 exports.readAllTours = readAll(Tour)
 
-// exports.readAllTours = async (req, res) => {
-//     try{
-//         const allTours = await Tour.find()
-//         return res.status(200).json({
-//             status: "success",
-//             data: allTours
-//         })
-//     } catch(err){
-//         return res.status(501).json({
-//             status: "failed",
-//             message: err.message
-//         })
-//     }
-// }
+exports.readFilterTours = catchAsync(async (req, res, next) => {
+    const filters = {...req.query}
+    const paginationKeys = ['limit', 'page', 'sort'];
+    paginationKeys.map(el => delete filters[el])
+    console.log('filters', filters)
+
+    // let query = Tour.find({})
+    console.log('req.query', req.query)
+
+    // const filterTours = await Tour.find(filters);
+    
+    const filterTours = Tour.find(filters);
+    const countTours = await Tour.find(filters).countDocuments()
+
+    if(req.query.sort){
+        let sortBy = req.query.sort.split(',').join(" ")
+        filterTours.sort(sortBy)
+    }
+
+    if(req.query.page || req.query.limit){
+        const page = req.query.page*1 || 1
+        const limit = req.query.limit*1 || 2
+        const skip = (page - 1)*limit
+        filterTours.skip(skip).limit(limit)
+
+        if(req.query.page && skip > countTours){
+            return next(new AppError(400, "Page number out of range"))
+        }
+    }
+
+
+    
+
+    const sortedResult = await filterTours;
+
+    res.json({
+        status: "success",
+        data: sortedResult
+    })
+    
+})
 
 // exports.deleteTour = async (req, res) => {
 //     try{
