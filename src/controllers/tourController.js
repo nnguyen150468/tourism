@@ -46,6 +46,8 @@ exports.readFilterTours = catchAsync(async (req, res, next) => {
     if(req.query.sort){
         let sortBy = req.query.sort.split(',').join(" ")
         filterTours.sort(sortBy)
+    } else if(!req.query.sort){
+        filterTours.sort("-createdAt")
     }
 
     if(req.query.page || req.query.limit){
@@ -58,9 +60,6 @@ exports.readFilterTours = catchAsync(async (req, res, next) => {
             return next(new AppError(400, "Page number out of range"))
         }
     }
-
-
-    
 
     const sortedResult = await filterTours;
 
