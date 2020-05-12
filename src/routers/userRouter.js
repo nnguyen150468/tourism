@@ -1,5 +1,5 @@
 const router = require('express').Router()
-const {createUser, readUsers, updateUser} = require('../controllers/userController')
+const {createUser, readUsers, updateUser, readMyProfile} = require('../controllers/userController')
 const { auth } = require('../controllers/authController')
 
 router.route("/")
@@ -8,5 +8,6 @@ router.route("/")
 
 router.route("/me")
 .patch(auth, updateUser)
+.get(auth, readMyProfile)
 
 module.exports = router;

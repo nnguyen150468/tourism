@@ -24,6 +24,13 @@ exports.createUser = catchAsync(async (req, res) => {
 
 exports.readUsers = readAll(User)
 
+exports.readMyProfile = (req, res) => {
+    return res.status(200).json({
+        status: "success",
+        data: req.user
+    })
+}
+
 // exports.readUsers = async (req, res) => {
 //     try{
 //         const users = await User.find();

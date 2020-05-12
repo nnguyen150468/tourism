@@ -7,6 +7,7 @@ const catchAsync = require('../middlewares/catchAsync')
 exports.createTour = async (req, res) => {
     try{
         console.log('req.body', req.body)
+        console.log('req.user',req.user)
         const tour = new Tour({
             ...req.body,
             organizer: req.user._id
@@ -20,7 +21,8 @@ exports.createTour = async (req, res) => {
             data: tour
         })
     } catch(err){
-        return res.status(401).json({
+        console.log(err)
+        return res.status(400).json({
             status: "failed ha",
             message: err.message
         })

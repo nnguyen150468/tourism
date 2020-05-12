@@ -7,7 +7,7 @@ exports.login = async (req, res) => {
         const user = await User.findByCredentials(email, password)
 
         const token = await user.generateToken();
-        
+        console.log('user', user)
         return res.status(200).json({
             status: "success",
             data: user,
@@ -28,11 +28,12 @@ exports.auth = async (req, res, next) => {
             throw new Error("Unauthorized access")
         }
         const token = req.headers.authorization.replace("Bearer ", "")
+        
         const decoded = await jwt.verify(token, process.env.SECRET);
         
-        const user = await User.findById(decoded.id)
+        const user = await User.findById(decoded._id)
         req.user = user
-        
+    
         next()
     } catch(err){
         return res.status(500).json({
@@ -40,7 +41,6 @@ exports.auth = async (req, res, next) => {
             message: err.message
         })
     }
-   
 }
 
 exports.logout = async (req, res) => {

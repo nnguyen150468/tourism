@@ -5,6 +5,8 @@ const app = express()
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const router = express.Router()
+const passport = require('./src/auth/passport')
+
 
 
 const { auth } = require('./src/controllers/authController')
@@ -32,8 +34,11 @@ mongoose.connect(process.env.LOCAL_DB, {
 app.use(bodyParser.urlencoded({extended: false})) //to what?
 app.use(bodyParser.json()) //to make request json?
 app.use(router)
+app.use(passport.initialize())
 
 // router.route("/").get((req, res) => {res.send("ok")})
+
+router.route("/").get((req,res) => res.send("OK"))
 
 router.use("/users", userRouter)
 
@@ -84,5 +89,5 @@ router.get("/categories", catchAsync(async (req, res, next) => {
     res.json(cates);
   }));
 
-app.listen(process.env.PORT, () => console.log("Listening to port",process.env.PORT))
+module.exports = app;
 
