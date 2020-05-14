@@ -20,6 +20,7 @@ const userRouter = require('./src/routers/userRouter')
 const authRouter = require('./src/routers/authRouter')
 const tourRouter = require('./src/routers/tourRouter')
 const reviewRouter = require('./src/routers/reviewRouter')
+const bookingRouter = require('./src/routers/bookingRouter')
 
 const { errorController } = require('./src/middlewares/errorController') 
 const AppError = require('./src/middlewares/appError')
@@ -44,6 +45,8 @@ router.route("/").get((req,res) => res.send("OK"))
 router.use("/users", userRouter)
 
 router.use("/tours/:tourID/reviews", reviewRouter)
+
+router.use("/tours/:tourID/bookings", bookingRouter)
 
 router.use("/tours", tourRouter)
 

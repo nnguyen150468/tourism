@@ -28,7 +28,7 @@ exports.updateOne = Model => catchAsync(async (req, res, next) => {
     switch(Model.modelName){
         case 'Tour':
             id = req.params.tourID
-            allows = ['title', 'description', 'guides']
+            allows = ['title', 'description', 'guides', 'price', 'groupSize']
             break;
         case 'Review':
             id = req.params.reviewID
