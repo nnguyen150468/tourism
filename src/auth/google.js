@@ -9,6 +9,7 @@ module.exports = new googleStrategy({
     scope: [ "email", "profile"]
 }, async function(accessToken, refreshToken, profile, cb){
     const {name, email} = profile._json
+    
     const user = await User.findOneOrCreate({name, email})
     cb(null, user)
 })

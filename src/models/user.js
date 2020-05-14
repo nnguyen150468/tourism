@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true
     },
-    tokens: Array
+    tokens: [String]
 })
 
 userSchema.pre("save", async function(next){ //this = doc
@@ -42,6 +42,7 @@ userSchema.pre("findOneAndUpdate", async function(next){ //this = query
 
 userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({email: email})
+    
     if(!user) throw new Error("No user found");
     const match = await bcrypt.compare(password.toString(), user.password);
     if(!match) throw new Error("No user found");

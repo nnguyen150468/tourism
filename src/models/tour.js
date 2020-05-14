@@ -62,7 +62,8 @@ const tourSchema = new mongoose.Schema({
 
 tourSchema.pre("save", async function(next){
     if(!this.isModified("guides")) return next();
-    const found = await User.find({"_id": {$in: this.guides}}).select("_id")
+    const found = await User.find({"id": {$in: this.guides}}).select("id")
+    console.log('found ======', this.guides)
     if(found.length!==this.guides.length)
         throw new Error("guide(s) doesn't exist")
     

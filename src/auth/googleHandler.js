@@ -6,7 +6,7 @@ exports.googleAuth = function(req, res, next){
     passport.authenticate("google", function(err, user, info){
         if(err) return res.redirect(`https://localhost:3000/login`)
 
-        console.log(user)
+        // console.log(user)
         return res.redirect(`https://localhost:3000/?token=${user.tokens[user.tokens.length-1]}`)
     })(req, res, next)
 }

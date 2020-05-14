@@ -6,7 +6,7 @@ const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const router = express.Router()
 const passport = require('./src/auth/passport')
-
+const cors = require('cors')
 
 
 const { auth } = require('./src/controllers/authController')
@@ -31,6 +31,7 @@ mongoose.connect(process.env.LOCAL_DB, {
     useUnifiedTopology: true
 }).then(()=> console.log("Successfully connected to database"))
 
+app.use(cors());
 app.use(bodyParser.urlencoded({extended: false})) //to what?
 app.use(bodyParser.json()) //to make request json?
 app.use(router)

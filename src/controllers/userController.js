@@ -7,6 +7,9 @@ const catchAsync = require('../middlewares/catchAsync')
 exports.createUser = catchAsync(async (req, res) => {
     try{
         const {name, email, password} = req.body;
+        
+        if(!password) throw new Error("You must enter a password")
+
         const user = new User({name, email, password})
         await user.save();
         
