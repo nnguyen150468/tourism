@@ -3,9 +3,11 @@ const jwt = require('jsonwebtoken')
 
 exports.login = async (req, res) => {
     try{
+        
         const {email, password} = req.body;
+        console.log('{email, password}=======', email, password)
         const user = await User.findByCredentials(email, password)
-
+        
         const token = await user.generateToken();
         
         return res.status(200).json({
@@ -28,9 +30,11 @@ exports.auth = async (req, res, next) => {
             throw new Error("Unauthorized access")
         }
         const token = req.headers.authorization.replace("Bearer ", "")
-        const decoded = await jwt.verify(token, process.env.SECRET);
         
+        const decoded = await jwt.verify(token, process.env.SECRET);
+        console.log('decoded ====', decoded)
         const user = await User.findById(decoded.id)
+        console.log('user========',user)
         req.user = user
         
         next()
@@ -40,17 +44,16 @@ exports.auth = async (req, res, next) => {
             message: err.message
         })
     }
-   
 }
 
 exports.logout = async (req, res) => {
     try{
         const token = req.headers.authorization.replace("Bearer ","");
-
+        console.log('token====', token)
         req.user.tokens = req.user.tokens.filter(el => el.toString()!==token)
         await req.user.save();
-
-        return res.status(200).json({
+        
+        return res.status(204).json({
             status: "success",
             data: req.user
         })

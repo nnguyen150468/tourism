@@ -5,6 +5,8 @@ const app = express()
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const router = express.Router()
+const passport = require('./src/auth/passport')
+const cors = require('cors')
 
 
 const { auth } = require('./src/controllers/authController')
@@ -18,6 +20,7 @@ const userRouter = require('./src/routers/userRouter')
 const authRouter = require('./src/routers/authRouter')
 const tourRouter = require('./src/routers/tourRouter')
 const reviewRouter = require('./src/routers/reviewRouter')
+const bookingRouter = require('./src/routers/bookingRouter')
 
 const { errorController } = require('./src/middlewares/errorController') 
 const AppError = require('./src/middlewares/appError')
@@ -29,15 +32,21 @@ mongoose.connect(process.env.LOCAL_DB, {
     useUnifiedTopology: true
 }).then(()=> console.log("Successfully connected to database"))
 
+app.use(cors());
 app.use(bodyParser.urlencoded({extended: false})) //to what?
 app.use(bodyParser.json()) //to make request json?
 app.use(router)
+app.use(passport.initialize())
 
 // router.route("/").get((req, res) => {res.send("ok")})
+
+router.route("/").get((req,res) => res.send("OK"))
 
 router.use("/users", userRouter)
 
 router.use("/tours/:tourID/reviews", reviewRouter)
+
+router.use("/tours/:tourID/bookings", bookingRouter)
 
 router.use("/tours", tourRouter)
 
@@ -84,5 +93,5 @@ router.get("/categories", catchAsync(async (req, res, next) => {
     res.json(cates);
   }));
 
-app.listen(process.env.PORT, () => console.log("Listening to port",process.env.PORT))
+module.exports = app;
 

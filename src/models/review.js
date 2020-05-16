@@ -66,7 +66,9 @@ reviewSchema.post("save", function(){
 })
 
 reviewSchema.pre(/^findOneAnd/, async function(next){
+    console.log('=========this review find ONe', this)
     this.doc = await this.findOne()
+    
     console.log('this.doc',this.doc)
     if(!this.doc) return next(new AppError(404, "Review not found"))
     next()

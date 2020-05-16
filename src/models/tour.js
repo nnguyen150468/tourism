@@ -2,6 +2,8 @@ const mongoose = require('mongoose')
 const User = require('./user')
 const Category = require('./category')
 const Review = require('./review')
+const Booking = require('./booking')
+const AppError = require('../middlewares/appError')
 
 const tourSchema = new mongoose.Schema({
     title: {
@@ -51,7 +53,16 @@ const tourSchema = new mongoose.Schema({
     price: {
         type: Number,
         required: [true, "Tour must have a price"],
-        min: 0
+        min: [0, "Tour price must be at least 0 dollars"]
+    },
+    groupSize: {
+        type: Number,
+        required: [true, "You must indicate a group size"],
+        min: [1, "Group size must be at least 1"]
+    },
+    availability: {
+        type: Number,
+        min: [0, "Minimum availablity is 0"]
     }
 }, {
     timestamps: true,
@@ -63,6 +74,7 @@ const tourSchema = new mongoose.Schema({
 tourSchema.pre("save", async function(next){
     if(!this.isModified("guides")) return next();
     const found = await User.find({"_id": {$in: this.guides}}).select("_id")
+    console.log('found ======', this.guides)
     if(found.length!==this.guides.length)
         throw new Error("guide(s) doesn't exist")
     
@@ -125,6 +137,34 @@ tourSchema.methods.toJSON = function(){
     return tourObject
 }
 
+tourSchema.pre("save", async function(next){
+    if(!this.isModified("groupSize"))
+        next()
+    
+    const booked = await Booking.countBooking(this._id)
+    this.availability = this.groupSize - booked;
+
+    if(this.availablity < 0){
+        return next(new AppError("Availability must be at least 0"))
+    }
+})
+
+tourSchema.pre(/^findOneAndUpDate/, async function(next){
+    console.log('this query========', this._conditions._id)
+    if(!this._update.groupSize)
+        next()
+    
+    const booked = await Booking.countBooking(this._conditions._id)
+    
+    this._update.availability = this._update.groupSize - booked;
+    if(this._update.availability < 0){
+        next(new AppError(400, "Availability must be at least 0"))
+    }
+    next()
+})
+
 const Tour = mongoose.model("Tour", tourSchema)
 
 module.exports = Tour;
+
+//pay with 4242 4242 4242 4242 
