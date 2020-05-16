@@ -2,7 +2,8 @@ const User = require('../models/user')
 const validator = require('validator')
 const { readAll, updateOne } = require('./factories')
 const catchAsync = require('../middlewares/catchAsync')
-
+const AppError = require('../middlewares/appError')
+const jwt = require('jsonwebtoken')
 
 exports.createUser = catchAsync(async (req, res) => {
     try{
@@ -73,3 +74,49 @@ exports.updateUser = updateOne(User)
 //         })
 //     }
 // }
+
+exports.resetPassword = catchAsync(async (req,res, next)=> {
+    const {email} = req.params;
+    if(!email) return next(new AppError(400, "Need to provide email"))
+
+    const user = await User.findOne({email: email})
+    if(!user) return res.status(200).json({
+        status: "success",
+        data: null
+    })
+
+    const token = jwt.sign({email: email}, process.env.SECRET,  {expiresIn:'15min'})
+
+    const sgMail = require('@sendgrid/mail');
+    sgMail.setApiKey(process.env.SENDGRID);
+    const msg = { 
+        to: user.email,
+        from: 'n.dinhnguyen95@gmail.com',
+        subject: 'Reset password request',
+        html: `Click <a href="https://localhost:3000/email/${token}">this link to reset your paswsword`
+    }
+
+    
+    console.log('msg=====', msg)
+    sgMail.send(msg);
+    return res.status(200).json({
+        status: "success",
+        data: null
+    })
+
+})
+
+exports.changePassword = catchAsync(async function(req, res, next){
+    
+    const {token} = req.params
+    const {password} = req.body
+    console.log('password ======', req.body)
+    const decoded = jwt.verify(token, process.env.SECRET)
+    
+    const user = await User.findOne({email: decoded.email})
+    user.password = password;
+    
+    await user.save()
+    console.log('user PASSWORD=====', user)
+    res.status(200).json({status: "success password", data: user})
+})
